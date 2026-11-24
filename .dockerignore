@@ -1,0 +1,8 @@
+bin/
+obj/
+.git/
+.vs/
+.vscode/
+khoya.db*
+app.db*
+*.pdf

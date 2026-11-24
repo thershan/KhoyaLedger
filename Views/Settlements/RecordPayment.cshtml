@@ -1,0 +1,26 @@
+@model KhoyaLedger.Models.FarmerSettlement
+@{ViewData["Title"] = "Record Settlement Payment";}
+<h2>Record Payment - @Model.Farmer?.Name</h2>
+<div class="row"><div class="col-md-5">
+<div class="card mb-3">
+    <div class="card-body">
+        <table class="table table-sm mb-0">
+            <tr><td>Net Payable</td><td class="fw-bold">₹@Model.NetPayable.ToString("N2")</td></tr>
+            <tr><td>Already Paid</td><td class="text-success">₹@Model.AmountPaid.ToString("N2")</td></tr>
+            <tr class="table-warning"><td><strong>Outstanding</strong></td><td class="fw-bold text-danger">₹@Model.OutstandingPayable.ToString("N2")</td></tr>
+        </table>
+    </div>
+</div>
+<form asp-action="RecordPayment" method="post">
+    <input type="hidden" name="settlementId" value="@Model.Id" />
+    <div class="mb-3"><label class="form-label fw-bold">Amount (₹)</label><input type="number" name="amount" step="0.01" max="@Model.OutstandingPayable" value="@Model.OutstandingPayable" class="form-control form-control-lg" /></div>
+    <div class="mb-3"><label class="form-label">Payment Mode</label>
+        <select name="mode" class="form-select">
+            <option value="1">Cash</option><option value="2">UPI</option><option value="3">Bank Transfer</option>
+        </select>
+    </div>
+    <div class="mb-3"><label class="form-label">Notes</label><input type="text" name="notes" class="form-control" /></div>
+    <button type="submit" class="btn btn-success btn-lg">Record Payment</button>
+    <a asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
+</form>
+</div></div>

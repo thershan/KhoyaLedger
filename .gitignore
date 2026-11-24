@@ -1,0 +1,29 @@
+## Build and compile artifacts
+bin/
+obj/
+out/
+
+## SQLite Local Databases
+*.db
+*.db-shm
+*.db-wal
+khoya.db
+app.db
+
+## IDE, Editor and User-specific files
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Temporary and profile directories
+edge-profile*
+
+## OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store

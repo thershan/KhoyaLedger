@@ -1,0 +1,35 @@
+@model List<KhoyaLedger.Models.Advance>
+@using KhoyaLedger.Models
+@{ViewData["Title"] = "Advances";}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>💳 Advances</h2>
+    <a asp-action="Create" class="btn btn-success">➕ Record Advance</a>
+</div>
+<form method="get" class="row g-2 mb-3">
+    <div class="col-auto">
+        <select name="farmerId" class="form-select">
+            <option value="">All Farmers</option>
+            @foreach (var f in ViewBag.Farmers as List<Farmer> ?? new())
+            { <option value="@f.Id" selected="@(ViewBag.FarmerId?.ToString() == f.Id.ToString())">@f.FarmerCode - @f.Name</option> }
+        </select>
+    </div>
+    <div class="col-auto"><button type="submit" class="btn btn-primary">Filter</button></div>
+</form>
+<div class="table-responsive">
+<table class="table table-hover table-sm">
+    <thead class="table-dark"><tr><th>Date</th><th>Farmer</th><th>Type</th><th>Amount</th><th>Recovery</th><th>Notes</th></tr></thead>
+    <tbody>
+    @foreach (var a in Model)
+    {
+        <tr>
+            <td>@a.TransactionDate</td>
+            <td>@a.Farmer?.Name <small>(@a.Farmer?.FarmerCode)</small></td>
+            <td><span class="badge @(a.Type == AdvanceType.Disbursement ? "bg-danger" : a.Type == AdvanceType.DirectRepayment ? "bg-success" : "bg-secondary")">@a.Type</span></td>
+            <td class="fw-bold">₹@a.Amount.ToString("N2")</td>
+            <td>@(a.RecoveryType != RecoveryType.None ? $"{a.RecoveryType}: {a.RecoveryValue}" : "-")</td>
+            <td>@a.Notes</td>
+        </tr>
+    }
+    </tbody>
+</table>
+</div>

@@ -1,0 +1,22 @@
+@model KhoyaLedger.Models.MilkCollection
+@using KhoyaLedger.Models
+@{ViewData["Title"] = "Post Collection";}
+<h2>Post Collection #@Model.ReceiptNumber</h2>
+<div class="row"><div class="col-md-5">
+<div class="card mb-3">
+    <div class="card-body">
+        <table class="table table-sm mb-0">
+            <tr><td>Farmer</td><td>@Model.Farmer?.Name (@Model.Farmer?.FarmerCode)</td></tr>
+            <tr><td>Date/Shift</td><td>@Model.CollectionDate / @Model.Shift</td></tr>
+            <tr><td>Litres</td><td>@Model.Litres L</td></tr>
+            <tr><td>Fat</td><td>@Model.Fat%</td></tr>
+            <tr><td>Rate</td><td>₹@Model.AppliedRate/L</td></tr>
+            <tr class="table-success"><td><strong>Gross Value</strong></td><td><strong>₹@Model.GrossMilkValue.ToString("N2")</strong></td></tr>
+        </table>
+    </div>
+</div>
+<form asp-action="Post" asp-route-id="@Model.Id" method="post">
+    <button type="submit" class="btn btn-success">✅ Confirm Post</button>
+    <a asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
+</form>
+</div></div>

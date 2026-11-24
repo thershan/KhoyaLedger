@@ -1,0 +1,164 @@
+@model KhoyaLedger.Models.MilkCollection
+@using KhoyaLedger.Models
+@{
+    ViewData["Title"] = "Record Milk Collection";
+    var farmers = ViewBag.Farmers as List<Farmer> ?? new();
+}
+
+<h2 class="mb-3">➕ Record Milk Collection</h2>
+
+<div class="row justify-content-center">
+<div class="col-lg-7 col-md-9">
+<form asp-action="Collect" method="post" id="collectForm">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5>🗓 Date & Shift</h5>
+            <div class="row g-2">
+                <div class="col-6">
+                    <label asp-for="CollectionDate" class="form-label fw-bold">Date</label>
+                    <input asp-for="CollectionDate" type="date" class="form-control form-control-lg" />
+                </div>
+                <div class="col-6">
+                    <label class="form-label fw-bold">Shift</label>
+                    <div class="d-flex gap-2 mt-1">
+                        <input type="radio" class="btn-check" name="Shift" id="shiftMorning" value="1" checked="@(Model.Shift == Shift.Morning)" />
+                        <label class="btn btn-outline-warning btn-lg flex-fill" for="shiftMorning">🌅 Morning</label>
+                        <input type="radio" class="btn-check" name="Shift" id="shiftEvening" value="2" checked="@(Model.Shift == Shift.Evening)" />
+                        <label class="btn btn-outline-primary btn-lg flex-fill" for="shiftEvening">🌙 Evening</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5>👨‍🌾 Farmer</h5>
+            <input type="text" id="farmerSearch" class="form-control form-control-lg mb-2" placeholder="Search farmer by code or name..." autocomplete="off" />
+            <div id="farmerResults" class="list-group mb-2" style="display:none; max-height:200px; overflow-y:auto;"></div>
+            <input asp-for="FarmerId" type="hidden" id="farmerId" />
+            <div id="selectedFarmer" class="alert alert-success py-2" style="display:none;"></div>
+            <span asp-validation-for="FarmerId" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5>📊 Measurements</h5>
+            <div class="row g-3">
+                <div class="col-6">
+                    <label asp-for="Litres" class="form-label fw-bold fs-5">Litres</label>
+                    <input asp-for="Litres" type="number" step="0.1" min="0" class="form-control form-control-lg" id="litresInput" />
+                    <span asp-validation-for="Litres" class="text-danger"></span>
+                </div>
+                <div class="col-6">
+                    <label asp-for="Fat" class="form-label fw-bold fs-5">Fat %</label>
+                    <input asp-for="Fat" type="number" step="0.1" min="0" max="15" class="form-control form-control-lg" id="fatInput" />
+                    <span asp-validation-for="Fat" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="mt-2">
+                <a data-bs-toggle="collapse" href="#optionalFields" class="text-muted small">▼ Optional fields (SNF, Weight)</a>
+                <div class="collapse" id="optionalFields">
+                    <div class="row g-2 mt-1">
+                        <div class="col-6">
+                            <label asp-for="SnfPercent" class="form-label">SNF %</label>
+                            <input asp-for="SnfPercent" type="number" step="0.1" class="form-control" />
+                        </div>
+                        <div class="col-6">
+                            <label asp-for="MeasuredWeightKg" class="form-label">Weight (kg)</label>
+                            <input asp-for="MeasuredWeightKg" type="number" step="0.1" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-3 bg-light" id="ratePreviewCard" style="display:none;">
+        <div class="card-body">
+            <h5>💰 Estimated Value</h5>
+            <table class="table table-sm mb-0">
+                <tr><td>Rate</td><td id="previewRate" class="fw-bold text-end">-</td></tr>
+                <tr><td>Gross Value</td><td id="previewGross" class="fw-bold text-end text-success fs-5">-</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <input asp-for="Notes" type="hidden" value="" />
+
+    <div class="d-grid">
+        <button type="submit" class="btn btn-success btn-lg" id="submitBtn">✅ Save Collection</button>
+    </div>
+</form>
+</div>
+</div>
+
+@section Scripts {
+<script>
+var farmerMilkType = null;
+var currentRate = 0;
+
+$('#farmerSearch').on('input', function() {
+    var q = $(this).val().trim();
+    if (q.length < 1) { $('#farmerResults').hide(); return; }
+    fetch('/api/farmers/search?q=' + encodeURIComponent(q))
+        .then(r => r.json())
+        .then(data => {
+            var html = '';
+            data.forEach(function(f) {
+                html += '<button type="button" class="list-group-item list-group-item-action farmer-item" ' +
+                    'data-id="' + f.id + '" data-name="' + f.name + '" data-code="' + f.farmerCode + '" data-village="' + f.village + '" data-milktype="' + f.milkType + '">' +
+                    '<strong>' + f.farmerCode + '</strong> - ' + f.name + ' (' + f.village + ') ' +
+                    '<span class="badge bg-secondary">' + (f.milkType == 1 ? 'Cow' : 'Buffalo') + '</span>' +
+                    '</button>';
+            });
+            if (data.length === 0) html = '<div class="list-group-item text-muted">No results</div>';
+            $('#farmerResults').html(html).show();
+        });
+});
+
+$(document).on('click', '.farmer-item', function() {
+    var id = $(this).data('id');
+    var name = $(this).data('name');
+    var code = $(this).data('code');
+    var village = $(this).data('village');
+    farmerMilkType = $(this).data('milktype');
+    $('#farmerId').val(id);
+    $('#farmerSearch').val(code + ' - ' + name);
+    $('#selectedFarmer').text('✓ ' + code + ' - ' + name + ', ' + village).show();
+    $('#farmerResults').hide();
+    updatePreview();
+});
+
+function updatePreview() {
+    var litres = parseFloat($('#litresInput').val()) || 0;
+    if (litres > 0 && currentRate > 0) {
+        var gross = Math.round(litres * currentRate * 100) / 100;
+        $('#previewRate').text('₹' + currentRate.toFixed(2) + '/L');
+        $('#previewGross').text('₹' + gross.toFixed(2));
+        $('#ratePreviewCard').show();
+    } else {
+        $('#ratePreviewCard').hide();
+    }
+}
+
+$('#litresInput, #fatInput').on('input', updatePreview);
+
+// Simple client-side rate preview (flat rate lookup not available, show placeholder)
+// The actual rate is computed server-side
+// For now just show if litres entered
+$('#litresInput').on('input', function() {
+    var l = parseFloat($(this).val()) || 0;
+    if (l > 0) { $('#ratePreviewCard').show(); }
+    else { $('#ratePreviewCard').hide(); }
+});
+
+// Anti-double-click
+$('#collectForm').on('submit', function() {
+    $('#submitBtn').prop('disabled', true).text('Saving...');
+});
+</script>
+}

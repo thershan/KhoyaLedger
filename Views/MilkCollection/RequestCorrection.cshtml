@@ -1,0 +1,16 @@
+@model KhoyaLedger.Models.MilkCollection
+@{ViewData["Title"] = "Request Correction";}
+<h2>Request Correction</h2>
+<div class="row"><div class="col-md-6">
+<div class="alert alert-info">
+    Original: <strong>@Model.ReceiptNumber</strong> - @Model.Farmer?.Name, @Model.CollectionDate @Model.Shift,
+    @Model.Litres L, Fat @Model.Fat%, ₹@Model.GrossMilkValue.ToString("N2")
+</div>
+<form asp-action="RequestCorrection" asp-route-id="@Model.Id" method="post">
+    <div class="mb-3"><label class="form-label fw-bold">Corrected Litres</label><input type="number" name="litres" step="0.1" value="@Model.Litres" class="form-control" /></div>
+    <div class="mb-3"><label class="form-label fw-bold">Corrected Fat%</label><input type="number" name="fat" step="0.1" value="@Model.Fat" class="form-control" /></div>
+    <div class="mb-3"><label class="form-label fw-bold">Reason for Correction</label><input type="text" name="correctionReason" class="form-control" required /></div>
+    <button type="submit" class="btn btn-warning">Submit Correction</button>
+    <a asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
+</form>
+</div></div>

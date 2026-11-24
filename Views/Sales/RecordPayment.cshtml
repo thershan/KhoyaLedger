@@ -1,0 +1,27 @@
+@model KhoyaLedger.Models.Sale
+@{ViewData["Title"] = "Record Sale Payment";}
+<h2>Record Payment - @Model.InvoiceNumber</h2>
+<div class="row"><div class="col-md-5">
+<div class="card mb-3">
+    <div class="card-body">
+        <table class="table table-sm mb-0">
+            <tr><td>Customer</td><td class="fw-bold">@Model.Customer?.Name</td></tr>
+            <tr><td>Total Amount</td><td>₹@Model.TotalAmount.ToString("N2")</td></tr>
+            <tr><td>Paid</td><td class="text-success">₹@Model.PaidAmount.ToString("N2")</td></tr>
+            <tr class="table-warning"><td><strong>Outstanding</strong></td><td class="fw-bold text-danger">₹@Model.OutstandingAmount.ToString("N2")</td></tr>
+        </table>
+    </div>
+</div>
+<form asp-action="RecordPayment" method="post">
+    <input type="hidden" name="saleId" value="@Model.Id" />
+    <div class="mb-3"><label class="form-label fw-bold">Amount (₹)</label><input type="number" name="amount" step="0.01" value="@Model.OutstandingAmount" class="form-control form-control-lg" /></div>
+    <div class="mb-3"><label class="form-label">Mode</label>
+        <select name="mode" class="form-select">
+            <option value="1">Cash</option><option value="2">UPI</option><option value="3">Bank Transfer</option>
+        </select>
+    </div>
+    <div class="mb-3"><label class="form-label">Notes</label><input type="text" name="notes" class="form-control" /></div>
+    <button type="submit" class="btn btn-success btn-lg">Record Payment</button>
+    <a asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
+</form>
+</div></div>

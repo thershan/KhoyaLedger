@@ -1,0 +1,22 @@
+@model KhoyaLedger.Models.Farmer
+@{ViewData["Title"] = "Opening Balance";}
+<h2>Set Opening Balance - @Model.Name</h2>
+<div class="row"><div class="col-md-5">
+<form asp-action="OpeningBalance" method="post">
+    <input asp-for="Id" type="hidden" />
+    <div class="mb-3">
+        <label class="form-label fw-bold">Advance Balance (owed by farmer)</label>
+        <input type="number" name="advanceBalance" step="0.01" value="@Model.AdvanceBalance" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label fw-bold">Milk Payable (owed to farmer)</label>
+        <input type="number" name="milkPayable" step="0.01" value="@Model.MilkPayable" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Notes</label>
+        <input type="text" name="notes" class="form-control" placeholder="Opening balance as of..." />
+    </div>
+    <button type="submit" class="btn btn-warning">Update Balances</button>
+    <a asp-action="Statement" asp-route-id="@Model.Id" class="btn btn-secondary ms-2">Cancel</a>
+</form>
+</div></div>

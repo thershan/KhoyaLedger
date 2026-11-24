@@ -1,0 +1,40 @@
+@model List<KhoyaLedger.Models.Sale>
+@using KhoyaLedger.Models
+@{ViewData["Title"] = "Sales";}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>🛒 Sales</h2>
+    <a asp-action="Create" class="btn btn-success">➕ New Sale</a>
+</div>
+<div class="table-responsive">
+<table class="table table-hover table-sm">
+    <thead class="table-dark"><tr><th>Invoice</th><th>Customer</th><th>Date</th><th>Qty</th><th>Total</th><th>Outstanding</th><th>Delivery</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>
+    @foreach (var s in Model)
+    {
+        var overdue = s.DueDate < DateOnly.FromDateTime(DateTime.Today) && s.OutstandingAmount > 0;
+        <tr class="@(overdue ? "table-danger" : "")">
+            <td><small>@s.InvoiceNumber</small></td>
+            <td>@s.Customer?.Name</td>
+            <td>@s.SaleDate @(s.DueDate.HasValue ? $"(due {s.DueDate})" : "")</td>
+            <td>@s.QuantityKg.ToString("F2") kg</td>
+            <td class="fw-bold">₹@s.TotalAmount.ToString("N2")</td>
+            <td class="fw-bold @(s.OutstandingAmount > 0 ? "text-danger" : "text-success")">₹@s.OutstandingAmount.ToString("N2")</td>
+            <td><span class="badge @(s.DeliveryStatus == DeliveryStatus.Delivered ? "bg-success" : "bg-warning text-dark")">@s.DeliveryStatus</span></td>
+            <td><span class="badge @(s.Status == SaleStatus.FullyPaid ? "bg-success" : s.Status == SaleStatus.PartiallyPaid ? "bg-warning text-dark" : "bg-secondary")">@s.Status</span></td>
+            <td>
+                @if (s.DeliveryStatus == DeliveryStatus.Pending)
+                {
+                    <form asp-action="Post" asp-route-id="@s.Id" method="post" class="d-inline">
+                        <button class="btn btn-sm btn-primary">Dispatch</button>
+                    </form>
+                }
+                @if (s.OutstandingAmount > 0)
+                {
+                    <a asp-action="RecordPayment" asp-route-saleId="@s.Id" class="btn btn-sm btn-success">Pay</a>
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+</div>

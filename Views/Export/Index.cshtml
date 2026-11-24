@@ -1,0 +1,32 @@
+@{ViewData["Title"] = "Export Data";}
+<h2>📥 Export Data</h2>
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5>Milk Collections CSV</h5>
+                <form asp-action="ExportMilkCsv" method="get" class="row g-2">
+                    <div class="col-6"><label class="form-label">From</label><input type="date" name="fromDate" class="form-control" value="@DateTime.Today.AddMonths(-1).ToString("yyyy-MM-dd")" /></div>
+                    <div class="col-6"><label class="form-label">To</label><input type="date" name="toDate" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" /></div>
+                    <div class="col-12"><button type="submit" class="btn btn-primary">⬇ Download CSV</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5>Farmer Statement CSV</h5>
+                <form asp-action="ExportFarmerStatement" method="get" class="row g-2">
+                    <div class="col-12">
+                        <label class="form-label">Farmer ID</label>
+                        <input type="number" name="id" class="form-control" placeholder="Farmer ID" />
+                    </div>
+                    <div class="col-6"><label class="form-label">From</label><input type="date" name="fromDate" class="form-control" value="@DateTime.Today.AddMonths(-1).ToString("yyyy-MM-dd")" /></div>
+                    <div class="col-6"><label class="form-label">To</label><input type="date" name="toDate" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" /></div>
+                    <div class="col-12"><button type="submit" class="btn btn-primary">⬇ Download CSV</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,91 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - खोया लेजर</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        .navbar-brand { font-weight: bold; font-size: 1.3rem; }
+        .card-inflow { border-left: 4px solid #198754; }
+        .card-outflow { border-left: 4px solid #dc3545; }
+        .card-neutral { border-left: 4px solid #0d6efd; }
+        body { font-size: 15px; }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-controller="Dashboard" asp-action="Index">🥛 खोया लेजर</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarMain">
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                            <li class="nav-item"><a class="nav-link" asp-controller="Dashboard" asp-action="Index">📊 Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="MilkCollection" asp-action="Index">🥛 Collections</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="MilkCollection" asp-action="Collect">➕ Collect</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Farmers" asp-action="Index">👨‍🌾 Farmers</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Rates" asp-action="Index">💰 Rates</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Advances" asp-action="Index">💳 Advances</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Settlements" asp-action="Index">📋 Settlements</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Production" asp-action="Index">🏭 Production</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Sales" asp-action="Index">🛒 Sales</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Export" asp-action="Index">📥 Export</a></li>
+                        </ul>
+                        <ul class="navbar-nav">
+                            <li class="nav-item">
+                                <span class="navbar-text me-2">👤 @User.Identity.Name</span>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/">Logout</a>
+                            </li>
+                        </ul>
+                    }
+                    else
+                    {
+                        <ul class="navbar-nav ms-auto">
+                            <li class="nav-item"><a class="nav-link" asp-area="Identity" asp-page="/Account/Login">Login</a></li>
+                        </ul>
+                    }
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container-fluid py-3">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        <main role="main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="bg-light border-top py-2 text-center text-muted small">
+        खोया लेजर &copy; @DateTime.Now.Year
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

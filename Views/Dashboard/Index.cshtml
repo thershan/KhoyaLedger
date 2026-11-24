@@ -1,0 +1,100 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    var fromDate = ViewBag.FromDate as DateOnly?;
+    var toDate = ViewBag.ToDate as DateOnly?;
+}
+
+<h2 class="mb-3">📊 Dashboard</h2>
+
+<form method="get" class="row g-2 mb-4">
+    <div class="col-auto">
+        <label class="col-form-label">From</label>
+    </div>
+    <div class="col-auto">
+        <input type="date" name="fromDate" class="form-control" value="@fromDate?.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="col-auto">
+        <label class="col-form-label">To</label>
+    </div>
+    <div class="col-auto">
+        <input type="date" name="toDate" class="form-control" value="@toDate?.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </div>
+</form>
+
+<div class="row g-3">
+    <!-- Milk Collection -->
+    <div class="col-md-6">
+        <div class="card card-inflow h-100">
+            <div class="card-body">
+                <h5 class="card-title text-success">🥛 Milk Purchase</h5>
+                <table class="table table-sm mb-0">
+                    <tr><td>Total Litres Collected</td><td class="fw-bold text-end">@(((decimal)ViewBag.TotalLitres).ToString("F2")) L</td></tr>
+                    <tr><td>Gross Milk Value</td><td class="fw-bold text-end text-success">₹@(((decimal)ViewBag.TotalMilkValue).ToString("N2"))</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Farmer Liabilities -->
+    <div class="col-md-6">
+        <div class="card card-outflow h-100">
+            <div class="card-body">
+                <h5 class="card-title text-danger">👨‍🌾 Farmer Liabilities</h5>
+                <table class="table table-sm mb-0">
+                    <tr><td>Total Advance Balance (owed by farmers)</td><td class="fw-bold text-end text-danger">₹@(((decimal)ViewBag.TotalAdvanceBalance).ToString("N2"))</td></tr>
+                    <tr><td>Total Milk Payable (owed to farmers)</td><td class="fw-bold text-end text-danger">₹@(((decimal)ViewBag.TotalMilkPayable).ToString("N2"))</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Production & Stock -->
+    <div class="col-md-6">
+        <div class="card card-neutral h-100">
+            <div class="card-body">
+                <h5 class="card-title text-primary">🏭 Production & Stock</h5>
+                <table class="table table-sm mb-0">
+                    <tr><td>Khoya Produced (period)</td><td class="fw-bold text-end">@(((decimal)ViewBag.TotalKhoyaProduced).ToString("F2")) kg</td></tr>
+                    <tr><td>Current Stock</td><td class="fw-bold text-end text-primary">@(((decimal)ViewBag.CurrentStock).ToString("F2")) kg</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Receivables -->
+    <div class="col-md-6">
+        <div class="card card-inflow h-100">
+            <div class="card-body">
+                <h5 class="card-title text-success">🛒 Customer Receivables</h5>
+                <table class="table table-sm mb-0">
+                    <tr><td>Total Outstanding</td><td class="fw-bold text-end text-success">₹@(((decimal)ViewBag.TotalOutstanding).ToString("N2"))</td></tr>
+                    <tr><td>Overdue</td><td class="fw-bold text-end text-danger">₹@(((decimal)ViewBag.OverdueOutstanding).ToString("N2"))</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cash Movements -->
+    <div class="col-12">
+        <div class="card card-neutral">
+            <div class="card-body">
+                <h5 class="card-title">💸 Cash Movements (Period)</h5>
+                <table class="table table-sm mb-0">
+                    <tr><td>Settlement Payouts to Farmers</td><td class="fw-bold text-end text-danger">₹@(((decimal)ViewBag.SettPayments).ToString("N2"))</td></tr>
+                    <tr><td>Sale Receipts from Customers</td><td class="fw-bold text-end text-success">₹@(((decimal)ViewBag.SalePayments).ToString("N2"))</td></tr>
+                    <tr class="table-active">
+                        <td><strong>Net Cash</strong></td>
+                        <td class="fw-bold text-end">₹@(((decimal)ViewBag.SalePayments - (decimal)ViewBag.SettPayments).ToString("N2"))</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a asp-controller="Demo" asp-action="VerifyScenario" class="btn btn-outline-secondary btn-sm">🧪 Verify Scenario</a>
+</div>

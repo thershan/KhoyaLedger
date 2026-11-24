@@ -1,0 +1,25 @@
+@model KhoyaLedger.Models.Advance
+@using KhoyaLedger.Models
+@{ViewData["Title"] = "Record Advance";}
+<h2>Record Advance</h2>
+<div class="row"><div class="col-md-6">
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="All" class="alert alert-danger"></div>
+    <div class="mb-3">
+        <label asp-for="FarmerId" class="form-label">Farmer</label>
+        <select asp-for="FarmerId" class="form-select">
+            <option value="">-- Select Farmer --</option>
+            @foreach (var f in ViewBag.Farmers as List<Farmer> ?? new())
+            { <option value="@f.Id" selected="@(Model.FarmerId == f.Id)">@f.FarmerCode - @f.Name (Adv: ₹@f.AdvanceBalance)</option> }
+        </select>
+    </div>
+    <div class="mb-3"><label asp-for="TransactionDate" class="form-label"></label><input asp-for="TransactionDate" type="date" class="form-control" /></div>
+    <div class="mb-3"><label asp-for="Type" class="form-label"></label><select asp-for="Type" asp-items="Html.GetEnumSelectList<KhoyaLedger.Models.AdvanceType>()" class="form-select"></select></div>
+    <div class="mb-3"><label asp-for="Amount" class="form-label">Amount (₹)</label><input asp-for="Amount" type="number" step="0.01" class="form-control" /></div>
+    <div class="mb-3"><label asp-for="RecoveryType" class="form-label">Recovery Rule</label><select asp-for="RecoveryType" asp-items="Html.GetEnumSelectList<KhoyaLedger.Models.RecoveryType>()" class="form-select"></select></div>
+    <div class="mb-3"><label asp-for="RecoveryValue" class="form-label">Recovery Value (₹/L or %)</label><input asp-for="RecoveryValue" type="number" step="0.01" class="form-control" /></div>
+    <div class="mb-3"><label asp-for="Notes" class="form-label">Notes</label><input asp-for="Notes" class="form-control" /></div>
+    <button type="submit" class="btn btn-success">Save</button>
+    <a asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
+</form>
+</div></div>

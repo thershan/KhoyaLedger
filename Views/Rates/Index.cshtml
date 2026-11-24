@@ -1,0 +1,33 @@
+@model List<KhoyaLedger.Models.MilkRateSlab>
+@using KhoyaLedger.Models
+@{ViewData["Title"] = "Milk Rates";}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>💰 Milk Rate Slabs</h2>
+    <a asp-action="Create" class="btn btn-success">➕ Add Rate</a>
+</div>
+<div class="table-responsive">
+<table class="table table-hover table-sm">
+    <thead class="table-dark"><tr><th>Milk Type</th><th>Type</th><th>Rate/Details</th><th>Effective From</th><th>Effective To</th><th>Actions</th></tr></thead>
+    <tbody>
+    @foreach (var s in Model)
+    {
+        <tr>
+            <td><span class="badge @(s.MilkType == MilkType.Buffalo ? "bg-info text-dark" : "bg-warning text-dark")">@s.MilkType</span></td>
+            <td>@(s.IsFlat ? "Flat" : "Fat-Based")</td>
+            <td>
+                @if (s.IsFlat) { <span>₹@s.FlatRate/L</span> }
+                else { <span>Fat @s.MinFat–@s.MaxFat%: ₹@s.Rate/L</span> }
+            </td>
+            <td>@s.EffectiveFrom.ToString("dd MMM yyyy")</td>
+            <td>@(s.EffectiveTo?.ToString("dd MMM yyyy") ?? "Active")</td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@s.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+                <form asp-action="Delete" asp-route-id="@s.Id" method="post" class="d-inline" onsubmit="return confirm('Delete this slab?')">
+                    <button class="btn btn-sm btn-outline-danger">Delete</button>
+                </form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+</div>

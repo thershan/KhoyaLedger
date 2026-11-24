@@ -1,0 +1,82 @@
+@model List<KhoyaLedger.Models.MilkCollection>
+@using KhoyaLedger.Models
+@{
+    ViewData["Title"] = "Milk Collections";
+    var date = ViewBag.Date as DateOnly?;
+    var shift = ViewBag.Shift as Shift?;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>🥛 Milk Collections</h2>
+    <a asp-action="Collect" class="btn btn-success">➕ Collect</a>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-auto">
+        <input type="date" name="date" class="form-control" value="@date?.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="col-auto">
+        <select name="shift" class="form-select">
+            <option value="">All Shifts</option>
+            <option value="1" selected="@(shift == Shift.Morning)">Morning</option>
+            <option value="2" selected="@(shift == Shift.Evening)">Evening</option>
+        </select>
+    </div>
+    <div class="col-auto"><button type="submit" class="btn btn-primary">Filter</button></div>
+    <div class="col-auto"><a asp-action="ShiftTally" asp-route-date="@date" asp-route-shift="@shift" class="btn btn-outline-secondary">📏 Tally</a></div>
+</form>
+
+<div class="mb-2">
+    <span class="badge bg-success fs-6">Total Litres: @ViewBag.TotalLitres L</span>
+    <span class="badge bg-primary fs-6 ms-2">Gross Value: ₹@(((decimal)ViewBag.TotalValue).ToString("N2"))</span>
+</div>
+
+<div class="table-responsive">
+<table class="table table-hover table-sm">
+    <thead class="table-dark">
+        <tr>
+            <th>Receipt</th><th>Farmer</th><th>Shift</th><th>Litres</th><th>Fat%</th><th>Rate</th><th>Gross</th><th>Status</th><th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var c in Model)
+    {
+        <tr class="@(c.Status == CollectionStatus.Corrected ? "table-secondary" : "")">
+            <td><small>@c.ReceiptNumber</small></td>
+            <td>@c.Farmer?.Name <small class="text-muted">(@c.Farmer?.FarmerCode)</small></td>
+            <td>@c.Shift</td>
+            <td>@c.Litres.ToString("F1")</td>
+            <td>@c.Fat.ToString("F1")</td>
+            <td>₹@c.AppliedRate.ToString("F2")</td>
+            <td class="fw-bold">₹@c.GrossMilkValue.ToString("N2")</td>
+            <td>
+                @if (c.Status == CollectionStatus.Pending)
+                { <span class="badge bg-warning text-dark">Pending</span> }
+                else if (c.Status == CollectionStatus.Posted)
+                { <span class="badge bg-success">Posted</span> }
+                else
+                { <span class="badge bg-secondary">Corrected</span> }
+            </td>
+            <td>
+                @if (c.Status == CollectionStatus.Pending && User.IsInRole("Owner"))
+                {
+                    <form asp-action="Post" asp-route-id="@c.Id" method="post" class="d-inline">
+                        <button class="btn btn-sm btn-success">Post</button>
+                    </form>
+                }
+                @if (c.Status == CollectionStatus.Posted)
+                {
+                    <a asp-action="RequestCorrection" asp-route-id="@c.Id" class="btn btn-sm btn-warning">Correct</a>
+                }
+                @if (c.Status == CollectionStatus.Corrected && User.IsInRole("Owner"))
+                {
+                    <form asp-action="ApproveCorrection" asp-route-id="@c.Id" method="post" class="d-inline">
+                        <button class="btn btn-sm btn-primary">Approve</button>
+                    </form>
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+</div>

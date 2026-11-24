@@ -1,0 +1,34 @@
+@model KhoyaLedger.Models.Sale
+@using KhoyaLedger.Models
+@{ViewData["Title"] = "New Sale";}
+<h2>New Sale</h2>
+<div class="row"><div class="col-md-7">
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+    <div class="mb-3">
+        <label asp-for="CustomerId" class="form-label">Customer</label>
+        <select asp-for="CustomerId" class="form-select">
+            <option value="">-- Select Customer --</option>
+            @foreach (var c in ViewBag.Customers as List<Customer> ?? new())
+            { <option value="@c.Id">@c.Name</option> }
+        </select>
+    </div>
+    <div class="mb-3">
+        <label asp-for="BatchId" class="form-label">Production Batch</label>
+        <select asp-for="BatchId" class="form-select">
+            <option value="">-- Select Batch --</option>
+            @foreach (var b in ViewBag.Batches as List<ProductionBatch> ?? new())
+            { <option value="@b.Id">@b.BatchNumber (@b.BatchDate) - Khoya: @b.KhoyaProducedKg kg</option> }
+        </select>
+    </div>
+    <p class="text-info">Current Stock: @(((decimal)ViewBag.CurrentStock).ToString("F2")) kg</p>
+    <div class="mb-3"><label asp-for="SaleDate" class="form-label"></label><input asp-for="SaleDate" type="date" class="form-control" /></div>
+    <div class="row g-2 mb-3">
+        <div class="col-6"><label asp-for="QuantityKg" class="form-label">Quantity (kg)</label><input asp-for="QuantityKg" type="number" step="0.01" class="form-control" /></div>
+        <div class="col-6"><label asp-for="PricePerKg" class="form-label">Price/kg (₹)</label><input asp-for="PricePerKg" type="number" step="0.01" class="form-control" /></div>
+    </div>
+    <div class="mb-3"><label asp-for="DueDate" class="form-label">Due Date (optional)</label><input asp-for="DueDate" type="date" class="form-control" /></div>
+    <button type="submit" class="btn btn-success">Create Sale</button>
+    <a asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
+</form>
+</div></div>

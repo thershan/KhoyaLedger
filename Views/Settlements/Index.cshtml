@@ -1,0 +1,65 @@
+@model List<KhoyaLedger.Models.FarmerSettlement>
+@using KhoyaLedger.Models
+@{
+    ViewData["Title"] = "Settlements";
+    var farmers = ViewBag.Farmers as List<Farmer> ?? new List<Farmer>();
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>📋 Settlements</h2>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h5>Create New Settlement</h5>
+        <form asp-action="Post" method="post" class="row g-2">
+            <div class="col-md-3">
+                <select name="farmerId" class="form-select">
+                    <option value="">-- Select Farmer --</option>
+                    @foreach (var f in farmers)
+                    { <option value="@f.Id">@f.FarmerCode - @f.Name (Adv: ₹@f.AdvanceBalance)</option> }
+                </select>
+            </div>
+            <div class="col-auto"><input type="date" name="fromDate" class="form-control" value="@DateTime.Today.AddMonths(-1).ToString("yyyy-MM-dd")" /></div>
+            <div class="col-auto"><input type="date" name="toDate" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" /></div>
+            <div class="col-auto"><button type="submit" class="btn btn-success">Post Settlement</button></div>
+        </form>
+    </div>
+</div>
+
+<div class="table-responsive">
+<table class="table table-hover table-sm">
+    <thead class="table-dark"><tr><th>Farmer</th><th>Period</th><th>Gross</th><th>Advance Recovered</th><th>Net Payable</th><th>Paid</th><th>Outstanding</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>
+    @foreach (var s in Model)
+    {
+        <tr>
+            <td>@s.Farmer?.Name <small>(@s.Farmer?.FarmerCode)</small></td>
+            <td><small>@s.PeriodFrom → @s.PeriodTo</small></td>
+            <td>₹@s.GrossMilkValue.ToString("N2")</td>
+            <td class="text-danger">₹@s.AdvanceRecovered.ToString("N2")</td>
+            <td class="fw-bold">₹@s.NetPayable.ToString("N2")</td>
+            <td class="text-success">₹@s.AmountPaid.ToString("N2")</td>
+            <td class="fw-bold @(s.OutstandingPayable > 0 ? "text-danger" : "text-success")">₹@s.OutstandingPayable.ToString("N2")</td>
+            <td>
+                @{
+                    var badge = s.Status switch {
+                        SettlementStatus.Draft => "bg-secondary",
+                        SettlementStatus.Posted => "bg-primary",
+                        SettlementStatus.PartiallyPaid => "bg-warning text-dark",
+                        SettlementStatus.FullyPaid => "bg-success",
+                        _ => "bg-secondary"
+                    };
+                }
+                <span class="badge @badge">@s.Status</span>
+            </td>
+            <td>
+                @if (s.Status == SettlementStatus.Posted || s.Status == SettlementStatus.PartiallyPaid)
+                {
+                    <a asp-action="RecordPayment" asp-route-settlementId="@s.Id" class="btn btn-sm btn-success">Pay</a>
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+</div>

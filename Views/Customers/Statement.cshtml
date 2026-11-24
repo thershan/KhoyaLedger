@@ -1,0 +1,39 @@
+@model List<KhoyaLedger.Models.Sale>
+@using KhoyaLedger.Models
+@{ViewData["Title"] = "Customer Statement"; var customer = ViewBag.Customer as Customer;}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>📋 @customer?.Name</h2>
+    <a asp-action="Index" class="btn btn-secondary btn-sm">← Back</a>
+</div>
+<div class="card border-danger mb-3">
+    <div class="card-body py-2">
+        <span class="text-muted">Total Outstanding: </span>
+        <strong class="text-danger fs-5">₹@(((decimal)ViewBag.TotalOutstanding).ToString("N2"))</strong>
+    </div>
+</div>
+<form method="get" class="row g-2 mb-3">
+    <input type="hidden" name="id" value="@customer?.Id" />
+    <div class="col-auto"><input type="date" name="fromDate" class="form-control" value="@((ViewBag.FromDate as DateOnly?)?.ToString("yyyy-MM-dd"))" /></div>
+    <div class="col-auto"><input type="date" name="toDate" class="form-control" value="@((ViewBag.ToDate as DateOnly?)?.ToString("yyyy-MM-dd"))" /></div>
+    <div class="col-auto"><button type="submit" class="btn btn-primary">Filter</button></div>
+</form>
+<div class="table-responsive">
+<table class="table table-sm table-hover">
+    <thead class="table-dark"><tr><th>Invoice</th><th>Date</th><th>Qty (kg)</th><th>Rate</th><th>Total</th><th>Paid</th><th>Outstanding</th><th>Status</th></tr></thead>
+    <tbody>
+    @foreach (var s in Model)
+    {
+        <tr class="@(s.DueDate < DateOnly.FromDateTime(DateTime.Today) && s.OutstandingAmount > 0 ? "table-danger" : "")">
+            <td><small>@s.InvoiceNumber</small></td>
+            <td>@s.SaleDate</td>
+            <td>@s.QuantityKg.ToString("F2")</td>
+            <td>₹@s.PricePerKg.ToString("F2")</td>
+            <td class="fw-bold">₹@s.TotalAmount.ToString("N2")</td>
+            <td class="text-success">₹@s.PaidAmount.ToString("N2")</td>
+            <td class="fw-bold @(s.OutstandingAmount > 0 ? "text-danger" : "text-success")">₹@s.OutstandingAmount.ToString("N2")</td>
+            <td><span class="badge @(s.Status == SaleStatus.FullyPaid ? "bg-success" : s.Status == SaleStatus.PartiallyPaid ? "bg-warning text-dark" : "bg-secondary")">@s.Status</span></td>
+        </tr>
+    }
+    </tbody>
+</table>
+</div>

@@ -1,0 +1,43 @@
+{
+   "background": {
+      "service_worker": "background.js",
+      "type": "module"
+   },
+   "content_scripts": [ {
+      "all_frames": true,
+      "exclude_matches": [ "*://kgd.gov.kz/*", "*://dms.scfhs.org.sa/*", "*://pgsearch.alternatifbank.com.tr/*", "*://civil.jcbank.com.jo/*", "*://sas-front-ios-ms.ntl.co.th/*", "*://react-test.bankrespublika.az/*", "*://lnt.goindigo.in/*", "*://ibcbsprd.ib.in/*", "*://ikportaladmin.ziraatkatilim.com.tr/*" ],
+      "js": [ "nw-hooking-content.js", "content.js" ],
+      "match_about_blank": true,
+      "matches": [ "\u003Call_urls>" ]
+   }, {
+      "all_frames": true,
+      "js": [ "nw-hooking-content.js", "content.js" ],
+      "match_about_blank": false,
+      "matches": [ "*://kgd.gov.kz/*", "*://dms.scfhs.org.sa/*", "*://pgsearch.alternatifbank.com.tr/*", "*://civil.jcbank.com.jo/*", "*://sas-front-ios-ms.ntl.co.th/*", "*://react-test.bankrespublika.az/*", "*://lnt.goindigo.in/*", "*://ibcbsprd.ib.in/*", "*://ikportaladmin.ziraatkatilim.com.tr/*" ]
+   }, {
+      "js": [ "nw-hooking-page.js", "page.js" ],
+      "matches": [ "\u003Call_urls>" ],
+      "run_at": "document_start",
+      "world": "MAIN"
+   } ],
+   "declarative_net_request": {
+      "rule_resources": [ {
+         "enabled": true,
+         "id": "block_rule_1",
+         "path": "rules.json"
+      } ]
+   },
+   "description": "Forcepoint extension is providing policy based DLP screening and responding over user activities.",
+   "host_permissions": [ "http://*/*", "https://*/*", "file:///" ],
+   "icons": {
+      "128": "icon-128.png",
+      "48": "icon-48.png"
+   },
+   "incognito": "split",
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2El5LScMFXi1CQTrzzjA3ZEMi5xGBwK3UUeG1GH93IeJ+WsqqOnpRyMfWNmpElp/YmaakcyNDH3J+m/9lJAijdmqCMp3VHKyXN4aTZpbvkL4DvP+w4jooA1KFyJ+NPXyz8OieU5bVQBQrvtDcv/kubvLEWA5C636UVOCB7atcFIp5/7IFRwtyR3VNHHkLjh0KUqbtUF/W0S72PRF/axO0lD4b2sGKkL9eDxnOZ9YN1ZP3VqJ5QIG1T0qrOs9mXOYQ6xwdyT7P94ZG8ZDOu4FWKSQ5YRdyA666zVXXiTh95BdJfZl9VQrU2LbAz9RSM93Z292L6VFHmlGe7sDdHIOSQIDAQAB",
+   "manifest_version": 3,
+   "name": "Data Loss Prevention Extension for Forcepoint One Endpoint",
+   "permissions": [ "declarativeNetRequest", "pageCapture", "tabs", "nativeMessaging", "webRequest", "webRequestBlocking", "storage", "webNavigation" ],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "3.2.25"
+}

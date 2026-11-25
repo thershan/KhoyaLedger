@@ -21,6 +21,13 @@ app.db
 ## Temporary and profile directories
 edge-profile*
 
+## Mobile App Node & Android Build
+mobile/node_modules/
+mobile/dist/
+mobile/android/.gradle/
+mobile/android/app/build/
+mobile/android/build/
+
 ## OS generated files
 Thumbs.db
 ehthumbs.db

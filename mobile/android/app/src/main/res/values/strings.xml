@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">KhoyaLedger</string>
+    <string name="title_activity_main">KhoyaLedger</string>
+    <string name="package_name">com.khoyaledger.app</string>
+    <string name="custom_url_scheme">com.khoyaledger.app</string>
+</resources>

@@ -35,6 +35,15 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 // App services
 builder.Services.AddScoped<IMilkRateService, MilkRateService>();
@@ -56,8 +65,10 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+app.UseDefaultFiles();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -76,5 +87,7 @@ app.MapGet("/api/farmers/search", async (string q, ApplicationDbContext db) =>
         .ToListAsync();
     return Results.Ok(farmers);
 }).RequireAuthorization();
+
+app.MapFallbackToFile("mobile/{*path:nonfile}", "mobile/index.html");
 
 app.Run();

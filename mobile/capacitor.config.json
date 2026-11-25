@@ -1,0 +1,9 @@
+{
+  "appId": "com.khoyaledger.app",
+  "appName": "KhoyaLedger",
+  "webDir": "dist/mobile/browser",
+  "server": {
+    "androidScheme": "http",
+    "cleartext": true
+  }
+}

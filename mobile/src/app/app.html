@@ -1,0 +1,349 @@
+<div class="mobile-viewport">
+
+  <!-- TOP HEADER -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="brand-logo">🥛</div>
+      <div>
+        <h1 class="brand-title">{{ lang === 'mr' ? 'खोया लेजर' : 'KhoyaLedger' }}</h1>
+        <span class="brand-subtitle">{{ lang === 'mr' ? 'डेअरी व खवा उत्पादन' : 'Dairy & Mawa ERP' }}</span>
+      </div>
+    </div>
+    
+    <div class="header-right">
+      <button class="status-pill" [class.online]="isOnline" (click)="checkHealth()" title="Click to test connection">
+        <span class="dot"></span>
+        <span>{{ isOnline ? (lang === 'mr' ? 'ऑनलाइन' : 'Online') : (lang === 'mr' ? 'ऑफलाइन' : 'Offline') }}</span>
+      </button>
+
+      <button class="lang-btn" (click)="toggleLanguage()">
+        {{ lang === 'mr' ? 'EN' : 'मराठी' }}
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN SCROLLABLE CONTENT -->
+  <main class="app-body">
+
+    <!-- TAB 1: INTAKE (दूध संकलन) -->
+    <div *ngIf="currentTab === 'intake'" class="tab-pane active-pane">
+      
+      <!-- SHIFT SELECTOR -->
+      <div class="shift-switch">
+        <button type="button" class="shift-btn" [class.active]="selectedShift === 'Morning'" (click)="setShift('Morning')">
+          ☀️ {{ lang === 'mr' ? 'सकाळ (Morning)' : 'Morning Shift' }}
+        </button>
+        <button type="button" class="shift-btn" [class.active]="selectedShift === 'Evening'" (click)="setShift('Evening')">
+          🌙 {{ lang === 'mr' ? 'संध्याकाळ (Evening)' : 'Evening Shift' }}
+        </button>
+      </div>
+
+      <!-- FARMER CARD -->
+      <section class="card farmer-card">
+        <div class="card-label">{{ lang === 'mr' ? 'शेतकरी निवडा' : 'Select Farmer' }}</div>
+        
+        <div class="farmer-picker">
+          <select [(ngModel)]="selectedFarmer" (ngModelChange)="recalculate()" class="native-select">
+            <option *ngFor="let f of farmers" [ngValue]="f">
+              #{{ f.farmerCode }} - {{ f.name }} ({{ f.village }}) [{{ f.milkType }}]
+            </option>
+          </select>
+        </div>
+
+        <div *ngIf="selectedFarmer" class="farmer-meta-badge">
+          <span class="badge milk-type" [class.buffalo]="selectedFarmer.milkType === 'Buffalo'">
+            {{ selectedFarmer.milkType === 'Buffalo' ? '🐃 म्हैस (Buffalo)' : '🐄 गाय (Cow)' }}
+          </span>
+          <span class="badge village-badge">📍 {{ selectedFarmer.village }}</span>
+          <span class="badge phone-badge">📞 {{ selectedFarmer.mobile }}</span>
+        </div>
+      </section>
+
+      <!-- LITRES INPUT SECTION -->
+      <section class="card input-section">
+        <div class="section-header">
+          <span class="card-label">{{ lang === 'mr' ? 'दूध प्रमाण (लिटर)' : 'Milk Quantity (Litres)' }}</span>
+          <span class="unit-tag">LITRES</span>
+        </div>
+
+        <div class="stepper-box">
+          <button type="button" class="step-btn minus" (click)="adjustLitres(-1)">−</button>
+          <div class="display-value">
+            <input type="number" [(ngModel)]="litres" (ngModelChange)="recalculate()" step="0.1" class="number-input">
+            <span class="unit">L</span>
+          </div>
+          <button type="button" class="step-btn plus" (click)="adjustLitres(1)">+</button>
+        </div>
+
+        <!-- QUICK ADD CHIPS -->
+        <div class="quick-chips">
+          <button type="button" class="chip" (click)="adjustLitres(0.5)">+0.5 L</button>
+          <button type="button" class="chip" (click)="adjustLitres(1.0)">+1.0 L</button>
+          <button type="button" class="chip" (click)="adjustLitres(2.0)">+2.0 L</button>
+          <button type="button" class="chip" (click)="adjustLitres(5.0)">+5.0 L</button>
+          <button type="button" class="chip" (click)="adjustLitres(10.0)">+10.0 L</button>
+        </div>
+      </section>
+
+      <!-- FAT % INPUT SECTION -->
+      <section class="card input-section">
+        <div class="section-header">
+          <span class="card-label">{{ lang === 'mr' ? 'फॅट प्रमाण (%)' : 'Fat Percentage (%)' }}</span>
+          <span class="unit-tag">FAT %</span>
+        </div>
+
+        <div class="stepper-box">
+          <button type="button" class="step-btn minus" (click)="adjustFat(-0.1)">−</button>
+          <div class="display-value">
+            <input type="number" [(ngModel)]="fat" (ngModelChange)="recalculate()" step="0.1" class="number-input">
+            <span class="unit">%</span>
+          </div>
+          <button type="button" class="step-btn plus" (click)="adjustFat(0.1)">+</button>
+        </div>
+
+        <!-- QUICK FAT CHIPS -->
+        <div class="quick-chips">
+          <button type="button" class="chip" (click)="adjustFat(-0.2)">-0.2</button>
+          <button type="button" class="chip" (click)="adjustFat(-0.1)">-0.1</button>
+          <button type="button" class="chip" (click)="adjustFat(0.1)">+0.1</button>
+          <button type="button" class="chip" (click)="adjustFat(0.2)">+0.2</button>
+          <button type="button" class="chip" (click)="adjustFat(0.5)">+0.5</button>
+        </div>
+      </section>
+
+      <!-- LIVE CALCULATION SUMMARY CARD -->
+      <section class="card calculation-card">
+        <div class="calc-row">
+          <div class="calc-col">
+            <span class="calc-label">{{ lang === 'mr' ? 'लागू दर' : 'Applied Rate' }}</span>
+            <span class="calc-num">₹{{ rate | number:'1.2-2' }} <small>/ L</small></span>
+          </div>
+          <div class="calc-divider">×</div>
+          <div class="calc-col">
+            <span class="calc-label">{{ lang === 'mr' ? 'एकूण दूध' : 'Total Litres' }}</span>
+            <span class="calc-num">{{ litres | number:'1.1-1' }} <small>L</small></span>
+          </div>
+        </div>
+
+        <div class="total-payout-box">
+          <span class="total-label">{{ lang === 'mr' ? 'एकूण रक्कम (Gross Payout)' : 'Total Amount' }}</span>
+          <span class="total-amount">₹{{ grossAmount | number:'1.2-2' }}</span>
+        </div>
+      </section>
+
+      <!-- SUBMIT BUTTON -->
+      <button type="button" class="submit-action-btn" [disabled]="isSubmitting" (click)="submitCollection()">
+        <span *ngIf="!isSubmitting">
+          💾 {{ lang === 'mr' ? 'संकलन जतन करा (Save Receipt)' : 'Save Collection Slip' }} ➔
+        </span>
+        <span *ngIf="isSubmitting">
+          ⏳ {{ lang === 'mr' ? 'जतन करत आहे...' : 'Saving...' }}
+        </span>
+      </button>
+
+    </div>
+
+    <!-- TAB 2: TODAY'S SHIFT (आजचे संकलन) -->
+    <div *ngIf="currentTab === 'today'" class="tab-pane active-pane">
+      <div class="sub-header">
+        <h2>{{ lang === 'mr' ? 'आजचे संकलन' : "Today's Intake" }}</h2>
+        <span class="count-tag">{{ todayCollections.length }} {{ lang === 'mr' ? 'पावत्या' : 'Slips' }}</span>
+      </div>
+
+      <!-- FILTER SWITCH -->
+      <div class="filter-pills">
+        <button class="pill" [class.active]="todayFilterShift === ''" (click)="todayFilterShift = ''; loadToday()">सर्व (All)</button>
+        <button class="pill" [class.active]="todayFilterShift === 'Morning'" (click)="todayFilterShift = 'Morning'; loadToday()">☀️ सकाळ</button>
+        <button class="pill" [class.active]="todayFilterShift === 'Evening'" (click)="todayFilterShift = 'Evening'; loadToday()">🌙 संध्याकाळ</button>
+      </div>
+
+      <!-- RECEIPT LIST -->
+      <div class="receipts-list">
+        <div *ngFor="let item of todayCollections" class="receipt-card">
+          <div class="rc-header">
+            <div class="rc-farmer">
+              <span class="rc-code">#{{ item.farmerCode }}</span>
+              <span class="rc-name">{{ item.farmerName }}</span>
+            </div>
+            <span class="rc-num">{{ item.receiptNumber }}</span>
+          </div>
+
+          <div class="rc-grid">
+            <div class="rc-item">
+              <span class="label">लिटर (L)</span>
+              <span class="val">{{ item.litres | number:'1.1-1' }}</span>
+            </div>
+            <div class="rc-item">
+              <span class="label">फॅट (%)</span>
+              <span class="val">{{ item.fat | number:'1.1-1' }}</span>
+            </div>
+            <div class="rc-item">
+              <span class="label">दर (₹/L)</span>
+              <span class="val">₹{{ item.appliedRate | number:'1.2-2' }}</span>
+            </div>
+            <div class="rc-item highlight">
+              <span class="label">रक्कम (₹)</span>
+              <span class="val total">₹{{ item.grossValue | number:'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="todayCollections.length === 0" class="empty-state">
+          <span>📦</span>
+          <p>{{ lang === 'mr' ? 'आज अद्याप कोणतेही संकलन झालेले नाही.' : 'No collections recorded today yet.' }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: DASHBOARD (डॅशबोर्ड) -->
+    <div *ngIf="currentTab === 'dashboard'" class="tab-pane active-pane">
+      <div class="sub-header">
+        <h2>{{ lang === 'mr' ? 'दैनिक डॅशबोर्ड' : 'Business Dashboard' }}</h2>
+        <span class="date-tag">📅 {{ stats?.date }}</span>
+      </div>
+
+      <!-- KPI METRIC CARDS -->
+      <div class="kpi-grid">
+        <div class="kpi-card blue">
+          <span class="kpi-icon">🥛</span>
+          <span class="kpi-title">{{ lang === 'mr' ? 'आजचे एकूण दूध' : "Today's Milk" }}</span>
+          <span class="kpi-val">{{ stats?.totalLitres | number:'1.1-1' }} L</span>
+          <span class="kpi-sub">☀️ {{ stats?.morningLitres }}L | 🌙 {{ stats?.eveningLitres }}L</span>
+        </div>
+
+        <div class="kpi-card gold">
+          <span class="kpi-icon">🧀</span>
+          <span class="kpi-title">{{ lang === 'mr' ? 'खवा शिल्लक साठा' : 'Khoya Stock' }}</span>
+          <span class="kpi-val">{{ stats?.khoyaStock | number:'1.2-2' }} kg</span>
+          <span class="kpi-sub">तयार खवा इन्व्हेंटरी</span>
+        </div>
+
+        <div class="kpi-card green">
+          <span class="kpi-icon">💰</span>
+          <span class="kpi-title">{{ lang === 'mr' ? 'आजचे एकूण बिल' : "Today's Payout" }}</span>
+          <span class="kpi-val">₹{{ stats?.totalGross | number:'1.2-2' }}</span>
+          <span class="kpi-sub">शेतकरी देय रक्कम</span>
+        </div>
+
+        <div class="kpi-card purple">
+          <span class="kpi-icon">👥</span>
+          <span class="kpi-title">{{ lang === 'mr' ? 'सक्रिय शेतकरी' : 'Active Farmers' }}</span>
+          <span class="kpi-val">{{ stats?.activeFarmers }}</span>
+          <span class="kpi-sub">नोंदणीकृत खातेदार</span>
+        </div>
+      </div>
+
+      <!-- QUICK INSIGHT -->
+      <div class="card insight-card">
+        <h3>💡 {{ lang === 'mr' ? 'उत्पादन उतारा माहिती (Yield Rule)' : 'Production Yield Insight' }}</h3>
+        <p>
+          {{ lang === 'mr' 
+            ? '१ किलो चांगल्या खव्यासाठी सरासरी ४.५ ते ५.० लिटर म्हशीचे दूध लागते. जर उतारा कमी येत असेल तर फॅट किंवा भेसळ तपासा.' 
+            : 'Average 4.5 to 5.0 Litres of Buffalo milk yields 1 kg Khoya. Monitor yield ratio daily to detect process loss.' }}
+        </p>
+      </div>
+    </div>
+
+    <!-- TAB 4: SETTINGS (सेटिंग्ज) -->
+    <div *ngIf="currentTab === 'settings'" class="tab-pane active-pane">
+      <div class="sub-header">
+        <h2>{{ lang === 'mr' ? 'ॲप व सर्व्हर सेटिंग्ज' : 'App Settings' }}</h2>
+      </div>
+
+      <div class="card settings-card">
+        <div class="card-label">{{ lang === 'mr' ? 'सेंट्रल सर्व्हर URL (Shop PC / Laptop)' : 'Central Server Host URL' }}</div>
+        <p class="settings-hint">
+          {{ lang === 'mr' 
+            ? 'दुकान लॅपटॉपचा लोकल वाय-फाय आयपी टाका (उदा. http://192.168.1.10:5000) किंवा क्लाउड URL.' 
+            : 'Enter local Wi-Fi IP of shop laptop or cloud URL.' }}
+        </p>
+        <input type="text" [(ngModel)]="serverUrlInput" class="text-input" placeholder="http://192.168.1.5:5000">
+
+        <button type="button" class="btn-primary" (click)="saveServerSettings()">
+          🔗 {{ lang === 'mr' ? 'कनेक्शन तपासा व सेव्ह करा' : 'Save & Test Connection' }}
+        </button>
+
+        <div class="connection-status-box" [class.connected]="isOnline">
+          <span>{{ isOnline ? '🟢 ' : '🔴 ' }}{{ pingMessage }}</span>
+        </div>
+      </div>
+
+      <div class="card info-card">
+        <h3>📱 KhoyaLedger Android Edition</h3>
+        <p><strong>Version:</strong> 2.0 Mobile (Angular + Capacitor)</p>
+        <p><strong>Database:</strong> SQLite khoya.db (Central Scoped Sync)</p>
+        <p><strong>Security:</strong> Double-Capped Settlement Engine</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- BOTTOM NAVIGATION BAR (Like Google Pay / PhonePe) -->
+  <nav class="bottom-nav">
+    <button type="button" class="nav-item" [class.active]="currentTab === 'intake'" (click)="selectTab('intake')">
+      <span class="nav-icon">🥛</span>
+      <span class="nav-text">{{ lang === 'mr' ? 'संकलन' : 'Intake' }}</span>
+    </button>
+
+    <button type="button" class="nav-item" [class.active]="currentTab === 'today'" (click)="selectTab('today')">
+      <span class="nav-icon">📋</span>
+      <span class="nav-text">{{ lang === 'mr' ? 'पावत्या' : 'Today' }}</span>
+    </button>
+
+    <button type="button" class="nav-item" [class.active]="currentTab === 'dashboard'" (click)="selectTab('dashboard')">
+      <span class="nav-icon">📊</span>
+      <span class="nav-text">{{ lang === 'mr' ? 'डॅशबोर्ड' : 'Stats' }}</span>
+    </button>
+
+    <button type="button" class="nav-item" [class.active]="currentTab === 'settings'" (click)="selectTab('settings')">
+      <span class="nav-icon">⚙️</span>
+      <span class="nav-text">{{ lang === 'mr' ? 'सेटिंग्ज' : 'Settings' }}</span>
+    </button>
+  </nav>
+
+  <!-- RECEIPT SLIP POPUP MODAL -->
+  <div *ngIf="showReceiptModal" class="modal-overlay" (click)="closeReceipt()">
+    <div class="receipt-modal" (click)="$event.stopPropagation()">
+      <div class="receipt-stamp">✅ {{ lang === 'mr' ? 'यशस्वी संकलन' : 'COLLECTION SAVED' }}</div>
+      
+      <div class="receipt-header-print">
+        <h3>खोया लेजर डेअरी</h3>
+        <p class="rc-id">पावती क्र: <strong>{{ latestReceipt?.receiptNumber }}</strong></p>
+        <p class="rc-date">दिनांक: {{ stats?.date || 'Today' }} ({{ latestReceipt?.shift }})</p>
+      </div>
+
+      <div class="receipt-divider"></div>
+
+      <div class="receipt-farmer-detail">
+        <span class="lbl">{{ lang === 'mr' ? 'शेतकरी:' : 'Farmer:' }}</span>
+        <strong class="val">#{{ latestReceipt?.farmerCode }} - {{ latestReceipt?.farmerName }}</strong>
+      </div>
+
+      <div class="receipt-table">
+        <div class="row">
+          <span>दूध (Litres):</span>
+          <strong>{{ latestReceipt?.litres }} L</strong>
+        </div>
+        <div class="row">
+          <span>फॅट (Fat %):</span>
+          <strong>{{ latestReceipt?.fat }} %</strong>
+        </div>
+        <div class="row">
+          <span>लागू दर (Rate):</span>
+          <strong>₹{{ latestReceipt?.appliedRate | number:'1.2-2' }} / L</strong>
+        </div>
+        <div class="row grand-total">
+          <span>एकूण रक्कम:</span>
+          <strong class="amt">₹{{ latestReceipt?.grossValue | number:'1.2-2' }}</strong>
+        </div>
+      </div>
+
+      <div class="receipt-footer-print">
+        <button type="button" class="btn-print" (click)="closeReceipt()">
+          ✓ {{ lang === 'mr' ? 'पुढील शेतकरी (Next)' : 'Done / Next' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
